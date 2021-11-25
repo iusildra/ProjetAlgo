@@ -6,6 +6,7 @@ protocol PieceProtocol {
 	associatedtype Color = EnumeratedSequence
 	associatedtype Shape = EnumeratedSequence
 	associatedtype Content = EnumeratedSequence
+	
 	var size:Size { get }
 	var color:Color { get }
 	var shape:Shape { get }
