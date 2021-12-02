@@ -14,7 +14,7 @@ protocol QuartoProtocol {
 	//Post : false s'il n'y a pas d'alignement. S'il existe un alignement, renvoie true, termine le jeu
 	func checkAlignement(coord: Coordinates) -> Bool
 
-	//Initialise le plateau avec le nom des joueurs et les pièces. Ne met aucune pièce qui a exactement les mêmes caractéristiques. Il doit exister 4 sets de 4 pièces différentes ayant au moins 1 caractéristiques différents
+	//Initialise le plateau
 	//Pré : _
 	//Post : _
 	init()

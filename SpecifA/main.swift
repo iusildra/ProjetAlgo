@@ -12,7 +12,6 @@ func main() {
 	let players = initPlayer(select: &selected) //Liste des joueurs
 	Glibc.system("clear")
 
-	var i = 0
 	while pieces.count != 0 && !gameOver {
 		print("##############################\nTour de \(players[selected])\n##############################")
 		let piece = choosePiece(pieces: &pieces) //Selection de la pièce
@@ -32,7 +31,6 @@ func main() {
 		} else {
 			//Toujours pas d'alignement
 			changePlayer(selected: &selected)
-			i+=1
 		}
 		Glibc.system("clear")
 	}
@@ -81,7 +79,7 @@ func chooseCoordinate(coordList: inout [Coordinates]) -> Coordinates {
 
 	var num = -1
 	repeat {
-		print("Entrez un numéro de position (0->\(coordList.count-1) : ", terminator: "")
+		print("Entrez un numéro de position (0->\(coordList.count-1)) : ", terminator: "")
 		num = Int(readLine()!) ?? -1
 	} while num<0 || num>=coordList.count
 
