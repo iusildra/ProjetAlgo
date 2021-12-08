@@ -1,5 +1,5 @@
 //BilleProtocole représente une bille, avec une position horizontale et verticale, et une couleur pour savoir à quel joueur la bille appartient
-protocol BilleProtocole {
+/*protocol BilleProtocole {
 
     // init : String x Int x Int -> Bille
     // Initialise une Bille de couleur et à une position données
@@ -53,3 +53,4 @@ struct Bille:BilleProtocole {
         self.posV = verticale
     }
 }
+*/

@@ -55,7 +55,7 @@ func main() {
         target_X = Int(readLine() ?? "") ?? -1
         print("Entrez la coordonnée y de la destination : ", terminator: "")
         target_Y = Int(readLine() ?? "") ?? -1
-      } while !checkTargetCoordinates(jeu: jeu, billeToMove:jeu.getBilleAtPos(horizontal:Position_X, vertical:Position_Y), x: target_X, y: target_Y) //On sait que la destination est dans le plateau et pas sur un bord, et que soit il y a déjà une bille dessus qu'on peut déplacer sans sortir une autre bille du plateau, soit qu'il n'y a pas de bille, alors la case est libre.
+      } while !checkTargetCoordinates(jeu: jeu, billeToMove:jeu.getBilleAtPos(horizontale:Position_X, verticale:Position_Y)!, x: target_X, y: target_Y) //On sait que la destination est dans le plateau et pas sur un bord, et que soit il y a déjà une bille dessus qu'on peut déplacer sans sortir une autre bille du plateau, soit qu'il n'y a pas de bille, alors la case est libre.
 
       jeu.moveBilleAtPos(bille: bille, horizontale: target_X, verticale: target_Y)
 
@@ -123,13 +123,13 @@ func checkTargetCoordinates(jeu: Jeu, billeToMove: Bille, x:Int, y:Int) -> Bool 
   if x < 1 || x > 6 || y < 1 || y > 6 { 
     print("Sélectionner une destination au centre du plateau !")
   }
-  else if jeu.canBilleMoveAtPos(bille:bille, horizontale:x, verticale:y) { //On peut déplacer la bille sans sortir une autre du plateau
+  else if jeu.canBilleMoveAtPos(bille:billeToMove, horizontale:x, verticale:y) { //On peut déplacer la bille sans sortir une autre du plateau
     res = true
   }
   else { 
     print("La bille ne peut pas être déplacée à cet endroit !")
   }
-  return true
+  return res
 }
 
 main()

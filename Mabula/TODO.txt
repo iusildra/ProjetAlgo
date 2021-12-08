@@ -1,0 +1,5 @@
+Faire l'init
+
+Faire une fonction privée qui permet de vérifier qu'une bille du centre peut être déplacé à des coordonées indiquées et modifier moveBilleAtPos en conséquence
+
+Faire les fonctions de calculs des scores
