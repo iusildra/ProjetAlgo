@@ -1,5 +1,5 @@
-Faire l'init
+Faire l'init : remplissage récursif du tableau
 
-Faire une fonction privée qui permet de vérifier qu'une bille du centre peut être déplacé à des coordonées indiquées et modifier moveBilleAtPos en conséquence
+VÉRIFIER FONCTION MOVEBILLEATPOS, CORE DUMPED POUR RAISON INCONNUE
 
 Faire les fonctions de calculs des scores

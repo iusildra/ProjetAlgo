@@ -6,7 +6,7 @@ func affichePlateau(jeu: Jeu){
     var texte = "\(l)"
     for c in 0..<8 {
       texte += " "
-      if let b = jeu.getBilleAtPos(horizontale:l, verticale:c) { texte += b.getCouleur() }
+      if let b = jeu.getBilleAtPos(horizontale:c, verticale:l) { texte += b.getCouleur() }
       else { texte += "_" }
     }
     print(texte)
@@ -25,13 +25,13 @@ func main() {
 
 
   var joueurActuel : String
-  if Int.random(in: 0..<2) % 2 == 0 { joueurActuel = "Blanc"}
-  else { joueurActuel = "Noir"}
+  if Int.random(in: 0..<2) % 2 == 0 { joueurActuel = "B"}
+  else { joueurActuel = "N"}
 
 
   affichePlateau(jeu: jeu)
   //Tant que les joueurs peuvent jouer
-  while jeu.canPlayerMove(couleur:"Blanc") || jeu.canPlayerMove(couleur:"Noir") {
+  while jeu.canPlayerMove(couleur:"B") || jeu.canPlayerMove(couleur:"N") {
     print("Tour de \(joueurActuel)")
 
     if jeu.canPlayerMove(couleur:joueurActuel) {
@@ -64,19 +64,19 @@ func main() {
     } else { print("\(joueurActuel) ne peut pas jouer") }
 
     // Changement de joueur
-    if joueurActuel == "Blanc" { joueurActuel = "Noir" }
-    else{ joueurActuel = "Blanc" }
+    if joueurActuel == "B" { joueurActuel = "N" }
+    else{ joueurActuel = "B" }
   }
 
   // La partie est fini, on compte les points selon le mode sélectionné
   var scoreBlanc : Int
   var scoreNoir : Int
   if(methode == 0) {
-    scoreBlanc = jeu.biggestGroup(couleur: "Blanc")
-    scoreNoir = jeu.biggestGroup(couleur: "Noir")
+    scoreBlanc = jeu.biggestGroup(couleur: "B")
+    scoreNoir = jeu.biggestGroup(couleur: "N")
   } else {
-    scoreBlanc = jeu.multGroup(couleur: "Blanc")
-    scoreNoir = jeu.multGroup(couleur: "Noir")
+    scoreBlanc = jeu.multGroup(couleur: "B")
+    scoreNoir = jeu.multGroup(couleur: "N")
   }
 
   print("Joueur Blanc : \(scoreBlanc) points / Joueur Noir : \(scoreNoir) points")
@@ -99,6 +99,7 @@ func checkSelectCoordinates(jeu: Jeu, x:Int, y:Int, joueur:String) -> Bool {
     print("La position n'est pas sur le bord du plateau !")
   }
   else if let bille = jeu.getBilleAtPos(horizontale:x, verticale:y) {
+    print(bille, joueur)
     if bille.getCouleur() != joueur {
       print("La bille ne vous appartient pas !")
     }

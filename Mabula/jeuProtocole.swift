@@ -88,106 +88,118 @@ struct Jeu:JeuProtocole {
         var balls:[String:Set<Bille>] = [players[0]:Set<Bille>(), players[1]:Set<Bille>()]
 
         //FONCTION RÉCURSIVE POUR INITIALISER LA PLATEAU*/
-        self.board = [[Bille?]]()
-        self.playerBalls = [:]
+        self.board = [[Bille?]](repeating: [Bille?](repeating: nil, count: Jeu.maxLength), count: Jeu.maxLength)
+        self.playerBalls = ["B":Set<Bille>(), "N":Set<Bille>()]
+        self.playerBalls["B"]?.insert(Bille.init(couleur: "B", horizontale: 1, verticale: 0))
+        self.playerBalls["B"]?.insert(Bille.init(couleur: "B", horizontale: 3, verticale: 0))
+        self.playerBalls["B"]?.insert(Bille.init(couleur: "B", horizontale: 5, verticale: 0))
+        self.playerBalls["B"]?.insert(Bille.init(couleur: "B", horizontale: Jeu.maxLength-1, verticale: 1))
+        self.playerBalls["B"]?.insert(Bille.init(couleur: "B", horizontale: Jeu.maxLength-1, verticale: 3))
+        self.playerBalls["B"]?.insert(Bille.init(couleur: "B", horizontale: Jeu.maxLength-1, verticale: 5))
+        self.playerBalls["B"]?.insert(Bille.init(couleur: "B", horizontale: 6, verticale: Jeu.maxLength-1))
+        self.playerBalls["B"]?.insert(Bille.init(couleur: "B", horizontale: 4, verticale: Jeu.maxLength-1))
+        self.playerBalls["B"]?.insert(Bille.init(couleur: "B", horizontale: 2, verticale: Jeu.maxLength-1))
+        self.playerBalls["B"]?.insert(Bille.init(couleur: "B", horizontale: 0, verticale: 6))
+        self.playerBalls["B"]?.insert(Bille.init(couleur: "B", horizontale: 0, verticale: 4))
+        self.playerBalls["B"]?.insert(Bille.init(couleur: "B", horizontale: 0, verticale: 2))
+
+        self.playerBalls["N"]?.insert(Bille.init(couleur: "N", horizontale: 2, verticale: 0))
+        self.playerBalls["N"]?.insert(Bille.init(couleur: "N", horizontale: 4, verticale: 0))
+        self.playerBalls["N"]?.insert(Bille.init(couleur: "N", horizontale: 6, verticale: 0))
+        self.playerBalls["N"]?.insert(Bille.init(couleur: "N", horizontale: Jeu.maxLength-1, verticale: 2))
+        self.playerBalls["N"]?.insert(Bille.init(couleur: "N", horizontale: Jeu.maxLength-1, verticale: 4))
+        self.playerBalls["N"]?.insert(Bille.init(couleur: "N", horizontale: Jeu.maxLength-1, verticale: 6))
+        self.playerBalls["N"]?.insert(Bille.init(couleur: "N", horizontale: 1, verticale: Jeu.maxLength-1))
+        self.playerBalls["N"]?.insert(Bille.init(couleur: "N", horizontale: 3, verticale: Jeu.maxLength-1))
+        self.playerBalls["N"]?.insert(Bille.init(couleur: "N", horizontale: 5, verticale: Jeu.maxLength-1))
+        self.playerBalls["N"]?.insert(Bille.init(couleur: "N", horizontale: 0, verticale: 1))
+        self.playerBalls["N"]?.insert(Bille.init(couleur: "N", horizontale: 0, verticale: 3))
+        self.playerBalls["N"]?.insert(Bille.init(couleur: "N", horizontale: 0, verticale: 5))
+
+        for billeB in self.playerBalls["B"]! {
+            self.board[billeB.getPosVerticale()][billeB.getPosHorizontale()] = billeB
+        }
+        for billeN in self.playerBalls["N"]! {
+            self.board[billeN.getPosVerticale()][billeN.getPosHorizontale()] = billeN
+        }
     }
 
     static func canBeSetOnBorder(board:inout[[Bille?]], couleur: String, horizontale: Int, verticale: Int) -> Bool {
         return isOnBorder(x: horizontale, y: verticale) && ballChain(board:&board, couleur: couleur, x: horizontale, y: verticale)
     }
 
-    static func isOnBorder(x:Int, y:Int) -> Bool {
-        guard x == 0 || x == maxLength-1 && (y > 0 && y < maxLength) else { //Vérifie sur une colonne
+    private static func isOnBorder(x:Int, y:Int) -> Bool {
+        if (x == 0 || x == maxLength-1) && (y == 0 || y == maxLength-1) { // Vérifie les coins
             return false
         }
-        guard y == 0 || y == maxLength-1 && (x > 0 && x < maxLength) else { // Vérifie sur une ligne
-            return false
+
+        var onBorder = false
+        if (x == 0 || x == maxLength-1) && (y > 0 && y < maxLength-1) { //Vérifie sur une colonne
+            onBorder = true
         }
-        guard (x == 0 || x == maxLength-1) && (y == 0 || y == maxLength-1) else { // Vérifie les coins
-            return false
+        if (y == 0 || y == maxLength-1) && (x > 0 && x < maxLength-1) { // Vérifie sur une ligne
+            onBorder = true
         }
-        return true
+        return onBorder
     }
 
     //Vérifie qu'il n'y a pas plus de 2 balles alignées à côté du nouvel emplacement
-    static func ballChain(board:inout[[Bille?]], couleur:String, x:Int, y:Int) -> Bool {
-        return ballChainX(board:&board, couleur: couleur, x: x, y: y) && ballChainY(board:&board, couleur: couleur, x: x, y: y)
+    private static func ballChain(board:inout[[Bille?]], couleur:String, x:Int, y:Int) -> Bool {
+        return clockwiseAlignemed(board:&board, couleur: couleur, x: x, y: y) && antiClockwiseAlignemed(board:&board, couleur: couleur, x: x, y: y)
     }
 
-    //Vérifie l'alignement des billes si la bille est placé sur une ligne
-    //Pré : y == 0 || y == maxLength-1
-    //Post : si la condition n'est pas respecté, return 0. Sinon renvoie le nombre de boules de même couleur à côté de la bille qui va être placé
-    static func ballChainX(board:inout[[Bille?]], couleur:String, x:Int, y:Int) -> Bool {
-        var sameNbR = 0 //Compte le nombre de boules de la même couleur à droite
-        var countR = 2 //Nombre de bille à parcourir à droite
-        var sameNbL = 0 //Compte le nombre de boules de la même couleur à gauche
-        var countL = 2 //Nombre de bille à parcourir à gauche
+    //Vérifie l'alignement des billes dans le sens horaire
+    //Pré : des coordonnées sur le bord
+    //Post : renvoie false si les coordonnées ne sont pas sur le bord
+    private static func clockwiseAlignemed(board:inout[[Bille?]], couleur:String, x:Int, y:Int, nbSame:Int=0, nbToCheck:Int=2) -> Bool {
+        guard nbToCheck != 0 else { return nbSame < 2 }
 
-        guard y == 0 || y == maxLength-1 else {
-            return true
+        guard Jeu.isOnBorder(x: x, y: y) else {
+            print("Coordonnées non valides !")
+            return false
         }
-
-        for i in 1...2 {
-            if x-i > 1 {
-                if let color = board[y][x-i]?.getCouleur(), color==couleur {
-                    sameNbL += 1
-                    countL-=1
+        
+        switch (x,y) {
+            case (_, 0):
+                if x < Jeu.maxLength-1 {
+                    if let color = board[y][x]?.getCouleur(), color==couleur {
+                        return clockwiseAlignemed(board: &board, couleur: couleur, x: x+1, y: y, nbSame: nbSame+1, nbToCheck: nbToCheck-1)
+                    } else { return true }
+                } else {
+                    return clockwiseAlignemed(board: &board, couleur: couleur, x: x, y: 1, nbSame: nbSame, nbToCheck: nbToCheck)
                 }
-            }
-            if x+i < maxLength-1 {
-                if let color = board[y][x+i]?.getCouleur(), color==couleur {
-                    sameNbL += 1
-                    countR-=1
+            case (maxLength-1, _):
+                if y < Jeu.maxLength-1 {
+                    if let color = board[y][x]?.getCouleur(), color==couleur {
+                        return clockwiseAlignemed(board: &board, couleur: couleur, x: x, y: y+1, nbSame: nbSame+1, nbToCheck: nbToCheck-1)
+                    } else { return true }
+                } else {
+                    return clockwiseAlignemed(board: &board, couleur: couleur, x: maxLength-2, y: y, nbSame: nbSame, nbToCheck: nbToCheck)
                 }
-            }
+            case (_, maxLength-1):
+                if x > 0 {
+                    if let color = board[y][x]?.getCouleur(), color==couleur {
+                        return clockwiseAlignemed(board: &board, couleur: couleur, x: x-1, y: y, nbSame: nbSame+1, nbToCheck: nbToCheck-1)
+                    } else { return true }
+                } else {
+                    return clockwiseAlignemed(board: &board, couleur: couleur, x: 0, y: maxLength-2, nbSame: nbSame, nbToCheck: nbToCheck)
+                }
+            case (0, _):
+                if y > 0 {
+                    if let color = board[y][x]?.getCouleur(), color==couleur {
+                        return clockwiseAlignemed(board: &board, couleur: couleur, x: x, y: y-1, nbSame: nbSame+1, nbToCheck: nbToCheck-1)
+                    } else { return true }
+                } else {
+                    return clockwiseAlignemed(board: &board, couleur: couleur, x: 1, y: 0, nbSame: nbSame, nbToCheck: nbToCheck)
+                }
+            default:
+                return true //Les préconditions font qu'on ne passera jamais par là
         }
-
-        for i in 1...countL { //Si countL >= 1, alors il faut vérifier les billes sur la colonne 0
-            if y == 0 {
-                if let color = board[x+i-1][0]?.getCouleur(), color==couleur {
-                    sameNbL+=1
-                }
-            } else {
-                if let color = board[x-i+1][0]?.getCouleur(), color==couleur {
-                    sameNbL+=1
-                }
-            }
-        }
-
-        for i in 1...countR {
-            if y == 0 {
-                if let color = board[x+i-maxLength+2][maxLength-1]?.getCouleur(), color==couleur {
-                    sameNbR+=1
-                }
-            } else {
-                if let color = board[x-i+1][maxLength-1]?.getCouleur(), color==couleur {
-                    sameNbR+=1
-                }
-            }
-        }
-        return sameNbR <= 2 && sameNbL <= 2
     }
 
-    //Vérifie l'alignement des billes si la bille est placé sur une ligne
-    //Pré : x == 0 || x == maxLength-1
-    //Post : si la condition n'est pas respecté, return 0. Sinon renvoie le nombre de boules de même couleur à côté de la bille qui va être placé
-    static func ballChainY(board:inout[[Bille?]], couleur:String, x:Int, y:Int) -> Bool {
-        var i = 1
-        //var sameNb = 1
-        while i <= 2 {
-            if y-i > 0 {
-                //if board[y-i][x].getCouleur() == couleur { sameNb+=1 }
-            } else {
-                //if board[0][-1*(y-i)+1].getCouleur() == couleur { sameNb+=1 }
-            }
-            if y+i < maxLength-1 {
-                //if board[y+i][x].getCouleur() == couleur { sameNb+=1 }
-            } else {
-                //if board[maxLength][(y+i) - maxLength + 2].getCouleur() == couleur { sameNb+=1 }
-            }
-            i+=1
-        }
-        return false//sameNb<2
+    //Vérifie dans le sens anti-horaire
+    private static func antiClockwiseAlignemed(board:inout[[Bille?]], couleur:String, x:Int, y:Int, nbSame:Int=0, nbToCheck:Int=2) -> Bool {
+        return false
     }
 
     mutating func placeBalls(player1:[Bille], player2:[Bille]) {
@@ -216,7 +228,7 @@ struct Jeu:JeuProtocole {
         }
 
         var canMove = false
-        for i in 0..<Jeu.maxLength {
+        for i in 1..<Jeu.maxLength-1 {
             //On itère sur ...
             if x==0 || x==Jeu.maxLength-1 { //... une ligne
                 if self.board[y][i] == nil { canMove = true }
@@ -239,7 +251,6 @@ struct Jeu:JeuProtocole {
     func canBilleMoveAtPos(bille: Bille, horizontale: Int, verticale: Int) -> Bool {
         let x = bille.getPosHorizontale(), y = bille.getPosVerticale()
         guard (x==horizontale || y==verticale) && Jeu.isOnBorder(x:x, y:y) else {
-            print("La destination n'est pas valide !")
             return false
         }
 
@@ -250,7 +261,7 @@ struct Jeu:JeuProtocole {
             }
         } else { //On déplace la bille sur une ligne
             for i in getRange(pos: x, target: horizontale) {
-                if self.board[x][i] == nil { canMove = true }
+                if self.board[y][i] == nil { canMove = true }
             }
         }
 
@@ -259,26 +270,43 @@ struct Jeu:JeuProtocole {
 
     private func getRange(pos:Int, target:Int) -> ClosedRange<Int> {
         if pos-target > 0 { //Gère les cas où pos = Jeu.maxLength-1
-            return 0...target
+            return 1...target
         } else { //Gère les cas où pos = 0
-            return target...Jeu.maxLength-1
+            return target...Jeu.maxLength-2
         }
     }
 
     mutating func moveBilleAtPos(bille: Bille, horizontale: Int, verticale: Int) {
+        func moveBallTo(bille1:Bille, x:Int, y:Int) {
+            guard let existingBall = self.board[y][x] else {
+                var updatedBall = bille1
+                updatedBall.setPosition(horizontale: x, verticale: y)
+                self.board[y][x] = updatedBall
+                return
+            }
+
+            var billeX = existingBall.getPosHorizontale()
+            var billeY = existingBall.getPosVerticale()
+
+            if bille.getPosHorizontale() == horizontale {
+                if bille1.getPosVerticale() < billeY { billeY += 1 }
+                else { billeY -= 1 }
+            } else {
+                if bille1.getPosHorizontale() < billeX { billeX += 1 }
+                else { billeX -= 1}
+            }
+
+            self.board[y][x] = bille1
+            moveBallTo(bille1: existingBall, x: billeX, y: billeY) //La condition d'arrêt est lorsque self.board[verticale][horizontale] est nil. Alors on place la bille 
+        }
+
         guard canBilleMoveAtPos(bille: bille, horizontale: horizontale, verticale: verticale) else {
             print("La destination n'est pas valide !")
             return
         }
-        if let existingBall = self.board[verticale][horizontale] {
-            let x = bille.getPosHorizontale(), y = bille.getPosVerticale()
-            var xStep = 0, yStep = 0
-            if x!=horizontale { xStep = abs(horizontale - x)/(horizontale - x) } //Détermine le sens de décalage
-            if y!=verticale { yStep = abs(verticale - y)/(verticale - y) } //Détermine le sens de décalage
-            moveBilleAtPos(bille: existingBall, horizontale: existingBall.getPosHorizontale()+xStep, verticale: existingBall.getPosVerticale()+yStep)
-        }
-        self.board[verticale][horizontale] = bille
-        bille.setPosition(horizontale: horizontale, verticale: verticale)
+
+        self.board[bille.getPosVerticale()][bille.getPosHorizontale()] = nil
+        moveBallTo(bille1: bille, x: horizontale, y: verticale)
     }
 
     func getBilleAtPos(horizontale: Int, verticale: Int) -> Bille? {
