@@ -101,7 +101,7 @@ struct Jeu:JeuProtocole {
         self.playerBalls["B"]?.insert(Bille.init(couleur: "B", horizontale: 2, verticale: Jeu.maxLength-1))
         self.playerBalls["B"]?.insert(Bille.init(couleur: "B", horizontale: 0, verticale: 6))
         self.playerBalls["B"]?.insert(Bille.init(couleur: "B", horizontale: 0, verticale: 4))
-        self.playerBalls["B"]?.insert(Bille.init(couleur: "B", horizontale: 0, verticale: 2))
+        self.playerBalls["N"]?.insert(Bille.init(couleur: "N", horizontale: 0, verticale: 2))
 
         self.playerBalls["N"]?.insert(Bille.init(couleur: "N", horizontale: 2, verticale: 0))
         self.playerBalls["N"]?.insert(Bille.init(couleur: "N", horizontale: 4, verticale: 0))
@@ -122,10 +122,12 @@ struct Jeu:JeuProtocole {
         for billeN in self.playerBalls["N"]! {
             self.board[billeN.getPosVerticale()][billeN.getPosHorizontale()] = billeN
         }
+
+        print(Jeu.checkAlignement(board: &self.board, couleur: "N", x: 1, y: 0))
     }
 
     static func canBeSetOnBorder(board:inout[[Bille?]], couleur: String, horizontale: Int, verticale: Int) -> Bool {
-        return isOnBorder(x: horizontale, y: verticale) && ballChain(board:&board, couleur: couleur, x: horizontale, y: verticale)
+        return isOnBorder(x: horizontale, y: verticale) && checkAlignement(board:&board, couleur: couleur, x: horizontale, y: verticale)
     }
 
     private static func isOnBorder(x:Int, y:Int) -> Bool {
@@ -144,62 +146,124 @@ struct Jeu:JeuProtocole {
     }
 
     //Vérifie qu'il n'y a pas plus de 2 balles alignées à côté du nouvel emplacement
-    private static func ballChain(board:inout[[Bille?]], couleur:String, x:Int, y:Int) -> Bool {
-        return clockwiseAlignemed(board:&board, couleur: couleur, x: x, y: y) && antiClockwiseAlignemed(board:&board, couleur: couleur, x: x, y: y)
+    private static func checkAlignement(board:inout[[Bille?]], couleur:String, x:Int, y:Int) -> Bool {
+        if x == 0 {
+            return clockwiseAlignement(board:&board, couleur: couleur, x: x, y: y-1) && anticlockwiseAlignement(board:&board, couleur: couleur, x: x, y: y+1)
+        }
+        if y == 0 {
+            return clockwiseAlignement(board:&board, couleur: couleur, x: x+1, y: y) && anticlockwiseAlignement(board:&board, couleur: couleur, x: x-1, y: y)
+        }
+
+        if x == Jeu.maxLength-1 {
+            return clockwiseAlignement(board:&board, couleur: couleur, x: x, y: y+1) && anticlockwiseAlignement(board:&board, couleur: couleur, x: x, y: y-1)
+        }
+        if y == Jeu.maxLength-1 {
+            return clockwiseAlignement(board:&board, couleur: couleur, x: x-1, y: y) && anticlockwiseAlignement(board:&board, couleur: couleur, x: x+1, y: y)
+        }
+        //Par défaut, si x,y != {0, Jeu.maxLength-1}, alors la bille ne serai pas sur le bord
+        return false
     }
 
     //Vérifie l'alignement des billes dans le sens horaire
-    //Pré : des coordonnées sur le bord
-    //Post : renvoie false si les coordonnées ne sont pas sur le bord
-    private static func clockwiseAlignemed(board:inout[[Bille?]], couleur:String, x:Int, y:Int, nbSame:Int=0, nbToCheck:Int=2) -> Bool {
-        guard nbToCheck != 0 else { return nbSame < 2 }
+    //Pré : _
+    //Post : _
+    private static func clockwiseAlignement(board:inout[[Bille?]], couleur:String, x:Int, y:Int, nbSame:Int=0) -> Bool {
+        guard nbSame < 2 else { return false }
 
-        guard Jeu.isOnBorder(x: x, y: y) else {
-            print("Coordonnées non valides !")
-            return false
-        }
+        var x=x, y=y
+        var nbSame=nbSame
         
-        switch (x,y) {
+        switch (x,y) { //On est sûr que board[y][x] est défini car 0 <= x,y < Jeu.maxLength
             case (_, 0):
                 if x < Jeu.maxLength-1 {
                     if let color = board[y][x]?.getCouleur(), color==couleur {
-                        return clockwiseAlignemed(board: &board, couleur: couleur, x: x+1, y: y, nbSame: nbSame+1, nbToCheck: nbToCheck-1)
+                        x+=1; nbSame+=1
                     } else { return true }
                 } else {
-                    return clockwiseAlignemed(board: &board, couleur: couleur, x: x, y: 1, nbSame: nbSame, nbToCheck: nbToCheck)
+                    x=Jeu.maxLength-1; y=1
                 }
+
             case (maxLength-1, _):
                 if y < Jeu.maxLength-1 {
                     if let color = board[y][x]?.getCouleur(), color==couleur {
-                        return clockwiseAlignemed(board: &board, couleur: couleur, x: x, y: y+1, nbSame: nbSame+1, nbToCheck: nbToCheck-1)
+                        y+=1; nbSame+=1
                     } else { return true }
                 } else {
-                    return clockwiseAlignemed(board: &board, couleur: couleur, x: maxLength-2, y: y, nbSame: nbSame, nbToCheck: nbToCheck)
+                    x=maxLength-2; y=Jeu.maxLength-1
                 }
-            case (_, maxLength-1):
+
+            case (_, Jeu.maxLength-1):
                 if x > 0 {
                     if let color = board[y][x]?.getCouleur(), color==couleur {
-                        return clockwiseAlignemed(board: &board, couleur: couleur, x: x-1, y: y, nbSame: nbSame+1, nbToCheck: nbToCheck-1)
+                        x-=1; nbSame+=1
                     } else { return true }
                 } else {
-                    return clockwiseAlignemed(board: &board, couleur: couleur, x: 0, y: maxLength-2, nbSame: nbSame, nbToCheck: nbToCheck)
+                    x=0; y=maxLength-2
                 }
+
             case (0, _):
                 if y > 0 {
                     if let color = board[y][x]?.getCouleur(), color==couleur {
-                        return clockwiseAlignemed(board: &board, couleur: couleur, x: x, y: y-1, nbSame: nbSame+1, nbToCheck: nbToCheck-1)
+                        y-=1; nbSame+=1
                     } else { return true }
                 } else {
-                    return clockwiseAlignemed(board: &board, couleur: couleur, x: 1, y: 0, nbSame: nbSame, nbToCheck: nbToCheck)
+                    x=1; y=0
                 }
             default:
                 return true //Les préconditions font qu'on ne passera jamais par là
         }
+
+        return clockwiseAlignement(board: &board, couleur: couleur, x: x, y: y, nbSame: nbSame)
     }
 
     //Vérifie dans le sens anti-horaire
-    private static func antiClockwiseAlignemed(board:inout[[Bille?]], couleur:String, x:Int, y:Int, nbSame:Int=0, nbToCheck:Int=2) -> Bool {
-        return false
+    private static func anticlockwiseAlignement(board:inout[[Bille?]], couleur:String, x:Int, y:Int, nbSame:Int=0) -> Bool {
+        guard nbSame < 2 else { return false }
+
+        var x=x, y=y
+        var nbSame=nbSame
+        
+        switch (x,y) { //On est sûr que board[y][x] est défini car 0 <= x,y < Jeu.maxLength
+            case (_, 0):
+                if x > 0 {
+                    if let color = board[y][x]?.getCouleur(), color==couleur {
+                        x-=1; nbSame+=1
+                    } else { return true }
+                } else {
+                    x=0; y=1
+                }
+
+            case (0, _):
+                if y < Jeu.maxLength-1 {
+                    if let color = board[y][x]?.getCouleur(), color==couleur {
+                        y+=1; nbSame+=1
+                    } else { return true }
+                } else {
+                    x=1; y=Jeu.maxLength-1
+                }
+
+            case (_, Jeu.maxLength-1):
+                if x < Jeu.maxLength-1 {
+                    if let color = board[y][x]?.getCouleur(), color==couleur {
+                        x+=1; nbSame+=1
+                    } else { return true }
+                } else {
+                    x=Jeu.maxLength-1; y=maxLength-2
+                }
+
+            case (Jeu.maxLength-1, _):
+                if y > 0 {
+                    if let color = board[y][x]?.getCouleur(), color==couleur {
+                        y-=1; nbSame+=1
+                    } else { return true }
+                } else {
+                    x=Jeu.maxLength-2; y=0
+                }
+            default:
+                return true //Les préconditions font qu'on ne passera jamais par là
+        }
+        
+        return anticlockwiseAlignement(board: &board, couleur: couleur, x: x, y: y, nbSame: nbSame)
     }
 
     mutating func placeBalls(player1:[Bille], player2:[Bille]) {
