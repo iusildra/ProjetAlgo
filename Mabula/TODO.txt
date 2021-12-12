@@ -1,5 +1,4 @@
-Faire l'init : remplissage récursif du tableau
-
 VÉRIFIER FONCTION MOVEBILLEATPOS, CORE DUMPED POUR RAISON INCONNUE
+	Corriger la fonction pour qu'elle pousse toutes les billes qui sont devant elle (donc modifier canBilleMoveAtPos). Actuellement, si la destination est vide, la bille se "téléporte" dessus, même s'il y a des billes entre elle et sa destination. Elle doit pousser toutes les billes devant elle.
 
 Faire les fonctions de calculs des scores

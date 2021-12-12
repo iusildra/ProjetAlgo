@@ -99,7 +99,6 @@ func checkSelectCoordinates(jeu: Jeu, x:Int, y:Int, joueur:String) -> Bool {
     print("La position n'est pas sur le bord du plateau !")
   }
   else if let bille = jeu.getBilleAtPos(horizontale:x, verticale:y) {
-    print(bille, joueur)
     if bille.getCouleur() != joueur {
       print("La bille ne vous appartient pas !")
     }
