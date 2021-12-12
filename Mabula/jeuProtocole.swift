@@ -101,50 +101,43 @@ enum Player:String {
 }
 struct Jeu:JeuProtocole {
     static let maxLength = 8
-    private var board:[[Bille?]]
-    var playerBalls = [Player.B.rawValue:Set<Bille>(), Player.N.rawValue:Set<Bille>()]
+    private var board = [[Bille?]](repeating: [Bille?](repeating: nil, count: Jeu.maxLength), count: Jeu.maxLength)
+    var playerBalls = [Player.B.rawValue:Set<Bille>(), Player.N.rawValue:Set<Bille>()] //Utilisation d'un set pour facilier la mise à jour des billes de chaque joueur
 
     init() {
-        /*var board = [[Bille?]](repeating: [Bille?](repeating: nil, count: Jeu.maxLength), count: Jeu.maxLength)
-        let players = [Player.B.rawValue, Player.N.rawValue]
-        var balls:[String:Set<Bille>] = [players[0]:Set<Bille>(), players[1]:Set<Bille>()]
+        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 3, verticale: 2))
+        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 4, verticale: 2))
+        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 5, verticale: 2))
+        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 2, verticale: 3))
+        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 3, verticale: 3))
+        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 5, verticale: 3))
+        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 2, verticale: 4))
+        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 3, verticale: 4))
+        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 4, verticale: 4))
+        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 5, verticale: 4))
+        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 5, verticale: 5))
+        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 2, verticale: 6))
 
-        //FONCTION RÉCURSIVE POUR INITIALISER LA PLATEAU*/
-        self.board = [[Bille?]](repeating: [Bille?](repeating: nil, count: Jeu.maxLength), count: Jeu.maxLength)
-        /*self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 1, verticale: 0))
-        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 3, verticale: 0))
-        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 5, verticale: 0))
-        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: Jeu.maxLength-1, verticale: 1))
-        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: Jeu.maxLength-1, verticale: 3))
-        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: Jeu.maxLength-1, verticale: 5))
-        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 6, verticale: Jeu.maxLength-1))
-        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 4, verticale: Jeu.maxLength-1))
-        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 2, verticale: Jeu.maxLength-1))
-        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 0, verticale: 6))
-        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 0, verticale: 4))
-        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 0, verticale: 2))
+        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 4, verticale: 1))
+        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 2, verticale: 2))
+        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 6, verticale: 2))
+        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 1, verticale: 3))
+        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 4, verticale: 3))
+        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 6, verticale: 3))
+        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 1, verticale: 4))
+        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 6, verticale: 4))
+        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 1, verticale: 5))
+        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 2, verticale: 5))
+        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 3, verticale: 5))
+        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 4, verticale: 5))
 
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 2, verticale: 0))
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 4, verticale: 0))
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 6, verticale: 0))
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: Jeu.maxLength-1, verticale: 2))
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: Jeu.maxLength-1, verticale: 4))
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: Jeu.maxLength-1, verticale: 6))
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 1, verticale: Jeu.maxLength-1))
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 3, verticale: Jeu.maxLength-1))
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 5, verticale: Jeu.maxLength-1))
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 0, verticale: 1))
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 0, verticale: 3))
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 0, verticale: 5))*/
-
-        Jeu.fillBoard(board: &self.board, balls: &playerBalls)
-
-        for billeB in self.playerBalls[Player.B.rawValue]! {
-            self.board[billeB.getPosVerticale()][billeB.getPosHorizontale()] = billeB
+        for (_,balls) in self.playerBalls {
+            for ball in balls {
+                self.board[ball.getPosVerticale()][ball.getPosHorizontale()] = ball
+            }
         }
-        for billeN in self.playerBalls[Player.N.rawValue]! {
-            self.board[billeN.getPosVerticale()][billeN.getPosHorizontale()] = billeN
-        }
+
+        //Jeu.fillBoard(board: &self.board, balls: &playerBalls)
     }
 
 
@@ -474,29 +467,76 @@ struct Jeu:JeuProtocole {
     }
 
     func biggestGroup(couleur: String) -> Int {
-    return 0
+        guard self.playerBalls.keys.contains(couleur) else {
+            fatalError("La couleur demandé n'existe pas")
+        }
+
+        var max = 0
+        var beenThere=Set<Bille>()
+
+        for ball in playerBalls[couleur]! {
+            var accN=0, accE=0, accS=0, accW=0
+            group(bille: ball, beenThere: &beenThere, accN: &accN, accE: &accE, accS: &accS, accW: &accW)
+            let count = 1+accN+accE+accS+accW
+            if count > max {
+                max = count
+            }
+        }
+        return max
     }
 
     func multGroup(couleur: String) -> Int {
-    return 0
+        guard self.playerBalls.keys.contains(couleur) else {
+            fatalError("La couleur demandé n'existe pas")
+        }
+
+        var prod = 1
+        var beenThere=Set<Bille>()
+
+        for ball in self.playerBalls[couleur]! {
+            var accN=0, accE=0, accS=0, accW=0
+            group(bille: ball, beenThere: &beenThere, accN: &accN, accE: &accE, accS: &accS, accW: &accW)
+            prod *= 1+accN+accE+accS+accW
+        }
+
+        return prod
     }
 
-    func getGroup(bille: Bille) -> Int {
-    return 0
+    func getGroup(bille: Bille) -> Int { //Fonction non utilisé car ne permettait pas de faire la fonction multGroup
+        return 0
     }
 
+    private func group(bille:Bille, beenThere:inout Set<Bille>, accN:inout Int, accE:inout Int, accS:inout Int, accW:inout Int) {
+        let x = bille.getPosHorizontale()
+        let y = bille.getPosVerticale()
+        beenThere.insert(bille) 
+
+        if y>0, let newBranch = self.board[y-1][x], newBranch.getCouleur()==bille.getCouleur() {
+            if !beenThere.contains(newBranch) {
+                accN+=1
+                group(bille: newBranch, beenThere: &beenThere, accN: &accN, accE: &accE, accS: &accS, accW: &accW)
+            }
+        }
+        if x<Jeu.maxLength-1, let newBranch = self.board[y][x+1], newBranch.getCouleur()==bille.getCouleur() {
+            if !beenThere.contains(newBranch) {
+                accE+=1
+                group(bille: newBranch, beenThere: &beenThere, accN: &accN, accE: &accE, accS: &accS, accW: &accW)
+            }
+        }
+        if y<Jeu.maxLength-1, let newBranch = self.board[y+1][x], newBranch.getCouleur()==bille.getCouleur() {
+            if !beenThere.contains(newBranch) {
+                accS+=1
+                group(bille: newBranch, beenThere: &beenThere, accN: &accN, accE: &accE, accS: &accS, accW: &accW)
+            }
+        }
+        if x>0, let newBranch = self.board[y][x-1], newBranch.getCouleur()==bille.getCouleur() {
+            if !beenThere.contains(newBranch) {
+                accW+=1
+                group(bille: newBranch, beenThere: &beenThere, accN: &accN, accE: &accE, accS: &accS, accW: &accW)
+            }
+        }
+    }
 }
-
-struct Coordinate:Hashable {
-    let x:Int
-    let y:Int
-
-    init(x:Int,y:Int) {
-        self.x=x
-        self.y=y
-    }
-}
-
 
 
 
