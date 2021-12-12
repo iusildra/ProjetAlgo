@@ -23,7 +23,7 @@ protocol QuartoProtocol: Sequence {
 	//S'assure de la conformité du choix de la pièce
 	//Pré : _
 	//Post : renvoie true si la pièce est disponible, false sinon
-	func checkPiece(coord:Coordinate) -> Bool
+	func checkPiece(piece:Piece) -> Bool
 
 	//Vérifie l'alignement de la pièce placée avec les autres. Il y a alignement lorsque 4 pièces adjacente partage une même caractéristiques. L'alignement peut être horizontal, vertical ou en diagonale. Une variante consiste à avoir un carré de pièces adjacentes. Renvoie aussi les coordonnées de l'alignement
 	//Pré : coordonnée valide et occupée
