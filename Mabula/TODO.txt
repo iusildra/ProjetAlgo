@@ -1,4 +1,3 @@
-VÉRIFIER FONCTION MOVEBILLEATPOS, CORE DUMPED POUR RAISON INCONNUE
-	Corriger la fonction pour qu'elle pousse toutes les billes qui sont devant elle (donc modifier canBilleMoveAtPos). Actuellement, si la destination est vide, la bille se "téléporte" dessus, même s'il y a des billes entre elle et sa destination. Elle doit pousser toutes les billes devant elle.
+Corriger l'init : il y a des enchaînements de plus de 2 boules de la même couleur
 
-Faire les fonctions de calculs des scores
+VÉRIFIER FONCTION MOVEBILLEATPOS, CORE DUMPED POUR RAISON INCONNUE
