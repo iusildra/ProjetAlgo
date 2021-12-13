@@ -102,34 +102,40 @@ enum Player:String {
 struct Jeu:JeuProtocole {
     static let maxLength = 8
     private var board = [[Bille?]](repeating: [Bille?](repeating: nil, count: Jeu.maxLength), count: Jeu.maxLength)
-    var playerBalls = [Player.B.rawValue:Set<Bille>(), Player.N.rawValue:Set<Bille>()] //Utilisation d'un set pour facilier la mise à jour des billes de chaque joueur
+    var playerBalls:[String:[Bille]]
 
     init() {
-        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 3, verticale: 2))
-        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 4, verticale: 2))
-        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 5, verticale: 2))
-        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 2, verticale: 3))
-        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 3, verticale: 3))
-        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 5, verticale: 3))
-        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 2, verticale: 4))
-        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 3, verticale: 4))
-        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 4, verticale: 4))
-        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 5, verticale: 4))
-        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 5, verticale: 5))
-        self.playerBalls[Player.B.rawValue]?.insert(Bille.init(couleur: Player.B.rawValue, horizontale: 2, verticale: 6))
+        var ballsN = [Bille]()
+        ballsN.reserveCapacity(12)
+        var ballsB = [Bille]()
+        ballsB.reserveCapacity(12)
+        self.playerBalls = [Player.B.rawValue:ballsB, Player.N.rawValue:ballsN]
 
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 4, verticale: 1))
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 2, verticale: 2))
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 6, verticale: 2))
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 1, verticale: 3))
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 4, verticale: 3))
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 6, verticale: 3))
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 1, verticale: 4))
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 6, verticale: 4))
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 1, verticale: 5))
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 2, verticale: 5))
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 3, verticale: 5))
-        self.playerBalls[Player.N.rawValue]?.insert(Bille.init(couleur: Player.N.rawValue, horizontale: 4, verticale: 5))
+        /*self.playerBalls[Player.B.rawValue]?.append(Bille.init(couleur: Player.B.rawValue, horizontale: 3, verticale: 2))
+        self.playerBalls[Player.B.rawValue]?.append(Bille.init(couleur: Player.B.rawValue, horizontale: 4, verticale: 2))
+        self.playerBalls[Player.B.rawValue]?.append(Bille.init(couleur: Player.B.rawValue, horizontale: 5, verticale: 2))
+        self.playerBalls[Player.B.rawValue]?.append(Bille.init(couleur: Player.B.rawValue, horizontale: 2, verticale: 3))
+        self.playerBalls[Player.B.rawValue]?.append(Bille.init(couleur: Player.B.rawValue, horizontale: 3, verticale: 3))
+        self.playerBalls[Player.B.rawValue]?.append(Bille.init(couleur: Player.B.rawValue, horizontale: 5, verticale: 3))
+        self.playerBalls[Player.B.rawValue]?.append(Bille.init(couleur: Player.B.rawValue, horizontale: 2, verticale: 4))
+        self.playerBalls[Player.B.rawValue]?.append(Bille.init(couleur: Player.B.rawValue, horizontale: 3, verticale: 4))
+        self.playerBalls[Player.B.rawValue]?.append(Bille.init(couleur: Player.B.rawValue, horizontale: 4, verticale: 4))
+        self.playerBalls[Player.B.rawValue]?.append(Bille.init(couleur: Player.B.rawValue, horizontale: 5, verticale: 4))
+        self.playerBalls[Player.B.rawValue]?.append(Bille.init(couleur: Player.B.rawValue, horizontale: 5, verticale: 5))
+        self.playerBalls[Player.B.rawValue]?.append(Bille.init(couleur: Player.B.rawValue, horizontale: 2, verticale: 6))
+
+        self.playerBalls[Player.N.rawValue]?.append(Bille.init(couleur: Player.N.rawValue, horizontale: 4, verticale: 1))
+        self.playerBalls[Player.N.rawValue]?.append(Bille.init(couleur: Player.N.rawValue, horizontale: 2, verticale: 2))
+        self.playerBalls[Player.N.rawValue]?.append(Bille.init(couleur: Player.N.rawValue, horizontale: 6, verticale: 2))
+        self.playerBalls[Player.N.rawValue]?.append(Bille.init(couleur: Player.N.rawValue, horizontale: 1, verticale: 3))
+        self.playerBalls[Player.N.rawValue]?.append(Bille.init(couleur: Player.N.rawValue, horizontale: 4, verticale: 3))
+        self.playerBalls[Player.N.rawValue]?.append(Bille.init(couleur: Player.N.rawValue, horizontale: 6, verticale: 3))
+        self.playerBalls[Player.N.rawValue]?.append(Bille.init(couleur: Player.N.rawValue, horizontale: 1, verticale: 4))
+        self.playerBalls[Player.N.rawValue]?.append(Bille.init(couleur: Player.N.rawValue, horizontale: 6, verticale: 4))
+        self.playerBalls[Player.N.rawValue]?.append(Bille.init(couleur: Player.N.rawValue, horizontale: 1, verticale: 5))
+        self.playerBalls[Player.N.rawValue]?.append(Bille.init(couleur: Player.N.rawValue, horizontale: 2, verticale: 5))
+        self.playerBalls[Player.N.rawValue]?.append(Bille.init(couleur: Player.N.rawValue, horizontale: 3, verticale: 5))
+        self.playerBalls[Player.N.rawValue]?.append(Bille.init(couleur: Player.N.rawValue, horizontale: 4, verticale: 5))*/
 
         for (_,balls) in self.playerBalls {
             for ball in balls {
@@ -137,13 +143,13 @@ struct Jeu:JeuProtocole {
             }
         }
 
-        //Jeu.fillBoard(board: &self.board, balls: &playerBalls)
+        Jeu.fillBoard(board: &self.board, balls: &playerBalls)
     }
 
 
     //Fonction récursive pour remplir le plateau. Renvoie true s'il est possible de remplir le plateau avec une bille appatenant au joueur
-    private static func fillBoard(board:inout[[Bille?]], balls:inout [String:Set<Bille>]) {
-        func fill(board:inout[[Bille?]], balls:inout[String:Set<Bille>], couleur:Player, x:Int=1, y:Int=0) -> Bool {
+    private static func fillBoard(board:inout[[Bille?]], balls:inout [String:[Bille]]) {
+        func fill(board:inout[[Bille?]], balls:inout[String:[Bille]], couleur:Player, x:Int=1, y:Int=0) -> Bool {
             var newX=x, newY=y
 
             switch (x,y) {
@@ -189,36 +195,34 @@ struct Jeu:JeuProtocole {
                 }
             }
 
-
-
             let bille = Bille.init(couleur: couleur.rawValue, horizontale: x, verticale: y)
             let billeOther = Bille.init(couleur: couleur.next().rawValue, horizontale: x, verticale: y)
             if Jeu.canBeSetOnBorder(board: &board, couleur: couleur.rawValue, horizontale: x, verticale: y) { //Vérifie si le joueur peut poser sa bille ici
                 board[y][x] = bille
-                balls[couleur.rawValue]?.insert(bille)
+                balls[couleur.rawValue]?.append(bille)
 
                 if fill(board: &board, balls: &balls, couleur: Player.random(), x:newX, y:newY) {
                     return true //Toutes les billes après ont pu être placé, donc le placement est correct
                 } else { //Les billes n'ont pas pu être placé, le placement est incorrect
                     board[y][x] = billeOther //On remplace la bille du joueur par celle de l'autre joueur
-                    balls[couleur.rawValue]?.remove(bille) //Et on la sort du set de bille du joueur
-                    balls[couleur.next().rawValue]?.insert(billeOther) //On mets la billeOther dans le set de l'autre joueur
+                    balls[couleur.rawValue]?.removeLast() //Et on la sort du set de bille du joueur
+                    balls[couleur.next().rawValue]?.append(billeOther) //On mets la billeOther dans le set de l'autre joueur
                     if fill(board: &board, balls: &balls, couleur: couleur.next(), x:newX, y:newY) {
                         return true
                     } else {
                         board[y][x] = nil
-                        balls[couleur.next().rawValue]?.remove(billeOther)
+                        balls[couleur.next().rawValue]?.removeLast()
                         return false 
                     }
                 }
             } else {
                 board[y][x] = billeOther
-                balls[couleur.next().rawValue]?.insert(billeOther)
+                balls[couleur.next().rawValue]?.append(billeOther)
                 if fill(board: &board, balls: &balls, couleur: couleur.next(), x:x, y:y) { //Comme on est sur un bords et pas un coin, on essaie de placer une bille de l'autre joueur
                     return true
                 } else { //On a pas pu placer la bille de l'autre joueur, le placement est donc faux.
                     board[y][x] = nil
-                    balls[couleur.next().rawValue]?.remove(billeOther)
+                    balls[couleur.next().rawValue]?.removeLast() //On supprime donc la bille du set de l'autre joueur
                     return false 
                 }
             }
@@ -431,11 +435,8 @@ struct Jeu:JeuProtocole {
     mutating func moveBilleAtPos(bille: Bille, horizontale: Int, verticale: Int) {
         func moveBallTo(bille1:Bille, x:Int, y:Int) {
             guard let existingBall = self.board[y][x] else {
-                var updatedBall = bille1
-                self.playerBalls[bille1.getCouleur()]?.remove(bille1)
-                updatedBall.setPosition(horizontale: x, verticale: y)
-                self.playerBalls[bille1.getCouleur()]?.insert(updatedBall)
-                self.board[y][x] = updatedBall
+                bille1.setPosition(horizontale: x, verticale: y)
+                self.board[y][x] = bille1
                 return
             }
 
@@ -472,7 +473,8 @@ struct Jeu:JeuProtocole {
         }
 
         var max = 0
-        var beenThere=Set<Bille>()
+        var beenThere=[Bille]()
+        beenThere.reserveCapacity(12)
 
         for ball in playerBalls[couleur]! {
             var accN=0, accE=0, accS=0, accW=0
@@ -491,7 +493,8 @@ struct Jeu:JeuProtocole {
         }
 
         var prod = 1
-        var beenThere=Set<Bille>()
+        var beenThere = [Bille]()
+        beenThere.reserveCapacity(12)
 
         for ball in self.playerBalls[couleur]! {
             var accN=0, accE=0, accS=0, accW=0
@@ -506,35 +509,43 @@ struct Jeu:JeuProtocole {
         return 0
     }
 
-    private func group(bille:Bille, beenThere:inout Set<Bille>, accN:inout Int, accE:inout Int, accS:inout Int, accW:inout Int) {
+    private func group(bille:Bille, beenThere:inout [Bille], accN:inout Int, accE:inout Int, accS:inout Int, accW:inout Int) {
         let x = bille.getPosHorizontale()
         let y = bille.getPosVerticale()
-        beenThere.insert(bille) 
+        beenThere.append(bille) 
 
         if y>0, let newBranch = self.board[y-1][x], newBranch.getCouleur()==bille.getCouleur() {
-            if !beenThere.contains(newBranch) {
+            if !ballContained(bille: newBranch, beenThere: &beenThere) {
                 accN+=1
                 group(bille: newBranch, beenThere: &beenThere, accN: &accN, accE: &accE, accS: &accS, accW: &accW)
             }
         }
         if x<Jeu.maxLength-1, let newBranch = self.board[y][x+1], newBranch.getCouleur()==bille.getCouleur() {
-            if !beenThere.contains(newBranch) {
+            if !ballContained(bille: newBranch, beenThere: &beenThere) {
                 accE+=1
                 group(bille: newBranch, beenThere: &beenThere, accN: &accN, accE: &accE, accS: &accS, accW: &accW)
             }
         }
         if y<Jeu.maxLength-1, let newBranch = self.board[y+1][x], newBranch.getCouleur()==bille.getCouleur() {
-            if !beenThere.contains(newBranch) {
+            if !ballContained(bille: newBranch, beenThere: &beenThere) {
                 accS+=1
                 group(bille: newBranch, beenThere: &beenThere, accN: &accN, accE: &accE, accS: &accS, accW: &accW)
             }
         }
         if x>0, let newBranch = self.board[y][x-1], newBranch.getCouleur()==bille.getCouleur() {
-            if !beenThere.contains(newBranch) {
+            if !ballContained(bille: newBranch, beenThere: &beenThere) {
                 accW+=1
                 group(bille: newBranch, beenThere: &beenThere, accN: &accN, accE: &accE, accS: &accS, accW: &accW)
             }
         }
+    }
+
+    private func ballContained(bille:Bille, beenThere:inout [Bille]) -> Bool {
+        var contains=false
+        for ball in beenThere {
+            if ball===bille { contains = true }
+        }
+        return contains
     }
 }
 
@@ -578,7 +589,7 @@ protocol BilleProtocole {
     mutating func setPosition(horizontale: Int, verticale: Int)
 }
 
-struct Bille:BilleProtocole, Hashable {
+class Bille:BilleProtocole {
     private let couleur:String
     var posH:Int
     var posV:Int
@@ -595,12 +606,12 @@ struct Bille:BilleProtocole, Hashable {
         return posV
     }
 
-    mutating func setPosition(horizontale: Int, verticale: Int) {
+    func setPosition(horizontale: Int, verticale: Int) {
         self.posH = horizontale
         self.posV = verticale
     }
 
-    init(couleur: String, horizontale: Int, verticale: Int) {
+    required init(couleur: String, horizontale: Int, verticale: Int) {
         self.couleur = couleur
         self.posH = horizontale
         self.posV = verticale
