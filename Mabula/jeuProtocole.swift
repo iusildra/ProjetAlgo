@@ -145,8 +145,8 @@ struct Jeu:JeuProtocole {
     }
 
 
-    //Fonction récursive pour remplir le plateau. Renvoie true s'il est possible de remplir le plateau avec une bille appatenant au joueur
     private static func fillBoard(board:inout[[Bille?]], balls:inout [String:[Bille]]) {
+        //Fonction récursive pour remplir le plateau. Renvoie true s'il est possible de remplir le plateau avec une bille appatenant au joueur
         func fill(board:inout[[Bille?]], balls:inout[String:[Bille]], couleur:Player, x:Int=1, y:Int=0) -> Bool {
             var newX=x, newY=y
 
@@ -195,6 +195,7 @@ struct Jeu:JeuProtocole {
 
             let bille = Bille.init(couleur: couleur.rawValue, horizontale: x, verticale: y)
             let billeOther = Bille.init(couleur: couleur.next().rawValue, horizontale: x, verticale: y)
+
             if Jeu.canBeSetOnBorder(board: &board, couleur: couleur.rawValue, horizontale: x, verticale: y) { //Vérifie si le joueur peut poser sa bille ici
                 board[y][x] = bille
                 balls[couleur.rawValue]?.append(bille)
@@ -216,7 +217,7 @@ struct Jeu:JeuProtocole {
             } else {
                 board[y][x] = billeOther
                 balls[couleur.next().rawValue]?.append(billeOther)
-                if fill(board: &board, balls: &balls, couleur: couleur.next(), x:x, y:y) { //Comme on est sur un bords et pas un coin, on essaie de placer une bille de l'autre joueur
+                if fill(board: &board, balls: &balls, couleur: couleur.next(), x:newX, y:newY) { //Comme on est sur un bords et pas un coin, on essaie de placer une bille de l'autre joueur
                     return true
                 } else { //On a pas pu placer la bille de l'autre joueur, le placement est donc faux.
                     board[y][x] = nil
@@ -231,7 +232,24 @@ struct Jeu:JeuProtocole {
     }
 
     static func canBeSetOnBorder(board:inout[[Bille?]], couleur: String, horizontale: Int, verticale: Int) -> Bool {
-        return isOnBorder(x: horizontale, y: verticale) && checkAlignement(board:&board, couleur: couleur, x: horizontale, y: verticale)
+        var balls = [Bille]()
+        balls.reserveCapacity(24)
+        var index = 0
+        for i in 1..<Jeu.maxLength-1 {
+            if let ball = board[0][i] { balls.append(ball); index+=1 }
+        }
+        for i in 1..<Jeu.maxLength-1 {
+            if let ball = board[i][Jeu.maxLength-1] { balls.append(ball); index+=1 }
+        }
+
+        for i in stride(from: Jeu.maxLength-2, through: 1, by: -1) {
+            if let ball = board[Jeu.maxLength-1][i] { balls.append(ball); index+=1 }
+        }
+        for i in stride(from: Jeu.maxLength-1, through: 1, by: -1) {
+            if let ball = board[i][0] { balls.append(ball); index+=1 }
+        }
+
+        return isOnBorder(x: horizontale, y: verticale) && checkAlignement(balls:balls, couleur: couleur, x: horizontale, y: verticale)
     }
 
     //Pour déterminer si les coordonées sont bien des coordonnées du bord
@@ -251,117 +269,26 @@ struct Jeu:JeuProtocole {
     }
 
     //Vérifie qu'il n'y a pas plus de 2 balles alignées à côté du nouvel emplacement (inout pour les fonctions récursives, pas de modification, évite <=2 copies)
-    private static func checkAlignement(board:inout[[Bille?]], couleur:String, x:Int, y:Int) -> Bool {
-        var nbSame=0
-        if x == 0 {
-            clockwiseAlignement(board:&board, couleur: couleur, x: x, y: y-1, nbSame: &nbSame)
-                anticlockwiseAlignement(board:&board, couleur: couleur, x: x, y: y+1, nbSame: &nbSame)
-        }
-        if y == 0 {
-            clockwiseAlignement(board:&board, couleur: couleur, x: x+1, y: y, nbSame: &nbSame)
-            anticlockwiseAlignement(board:&board, couleur: couleur, x: x-1, y: y, nbSame: &nbSame)
+    private static func checkAlignement(balls:[Bille], couleur:String, x:Int, y:Int) -> Bool {
+        guard balls.count >= 2 else {
+            return true
         }
 
-        if x == Jeu.maxLength-1 {
-            clockwiseAlignement(board:&board, couleur: couleur, x: x, y: y+1, nbSame: &nbSame)
-            anticlockwiseAlignement(board:&board, couleur: couleur, x: x, y: y-1, nbSame: &nbSame)
-        }
-        if y == Jeu.maxLength-1 {
-            clockwiseAlignement(board:&board, couleur: couleur, x: x-1, y: y, nbSame: &nbSame)
-            anticlockwiseAlignement(board:&board, couleur: couleur, x: x+1, y: y, nbSame: &nbSame)
+        var nbSame=0
+        var i = 0
+        while i < 2 {
+            if balls.count - nbSame >= 0 {
+                if balls[balls.count-1 - nbSame].getCouleur() == couleur { nbSame+=1 }
+                else { return true }
+            }
+            if balls.count == 24 {
+                if balls[nbSame].getCouleur() == couleur { nbSame+=1 }
+                else { return true }
+            }
+            i+=1
         }
         //Par défaut, si x,y != {0, Jeu.maxLength-1}, alors la bille ne serai pas sur le bord
-        return nbSame<2
-    }
-
-    //Vérifie l'alignement des billes dans le sens horaire (inout car récursif, pas de modification, évite 2 copies)
-    private static func clockwiseAlignement(board:inout[[Bille?]], couleur:String, x:Int, y:Int, nbSame:inout Int) {
-        guard nbSame < 2 else { return }
-
-        var x=x, y=y
-        guard let color = board[y][x]?.getCouleur() else {
-            return
-        }
-        
-        switch (x,y) { //On est sûr que board[y][x] est défini car 0 <= x,y < Jeu.maxLength
-            case (1...Jeu.maxLength-1, 0):
-                if x < Jeu.maxLength-1 {
-                    if color==couleur { x+=1; nbSame+=1 }
-                    else { return }
-                } else { y=1 } //x=Jeu.maxLength-1
-                break
-
-            case (maxLength-1, 1...Jeu.maxLength-1):
-                if y < Jeu.maxLength-1 {
-                    if color==couleur { y+=1; nbSame+=1 }
-                    else { return }
-                } else { x=maxLength-2 } //y=Jeu.maxLength-1
-                break
-
-            case (0...Jeu.maxLength-2, Jeu.maxLength-1):
-                if x > 0 {
-                    if color==couleur { x-=1; nbSame+=1 }
-                    else { return }
-                } else { y=maxLength-2 } //x=0
-                break
-
-            case (0, 0...Jeu.maxLength-2):
-                if y > 0 {
-                    if color==couleur { y-=1; nbSame+=1 }
-                    else { return }
-                } else { x=1 } //y=0
-                break
-
-            default:
-                return //Les préconditions font qu'on ne passera jamais par là
-        }
-
-        clockwiseAlignement(board: &board, couleur: couleur, x: x, y: y, nbSame: &nbSame)
-    }
-
-    //Vérifie dans le sens anti-horaire (inout car récursif, pas de modification, évite 2 copies)
-    private static func anticlockwiseAlignement(board:inout[[Bille?]], couleur:String, x:Int, y:Int, nbSame:inout Int) {
-        guard nbSame < 2 else { return }
-
-        var x=x, y=y
-        guard let color = board[y][x]?.getCouleur() else {
-            return
-        }
-        
-        switch (x,y) { //On est sûr que board[y][x] est défini car 0 <= x,y < Jeu.maxLength
-            case (0...Jeu.maxLength-2, 0):
-                if x > 0 {
-                    if color==couleur { x-=1; nbSame+=1 }
-                    else { return }
-                } else { y=1 } //x=0
-                break
-
-            case (0, 1...Jeu.maxLength-1):
-                if y < Jeu.maxLength-1 {
-                    if color==couleur { y+=1; nbSame+=1 }
-                    else { return }
-                } else { x=1 } //y=Jeu.maxLength-1
-                break
-
-            case (1...Jeu.maxLength-1, Jeu.maxLength-1):
-                if x < Jeu.maxLength-1 {
-                    if color==couleur { x+=1; nbSame+=1 }
-                    else { return }
-                } else { y=maxLength-2 } //x=Jeu.maxLength-1
-                break
-
-            case (Jeu.maxLength-1, 0...Jeu.maxLength-2):
-                if y > 0 {
-                    if color==couleur { y-=1; nbSame+=1 }
-                    else { return }
-                } else { x=Jeu.maxLength-2 } //y=0
-                break
-
-            default:
-                return //Les préconditions font qu'on ne passera jamais par là
-        }
-        
-        anticlockwiseAlignement(board: &board, couleur: couleur, x: x, y: y, nbSame: &nbSame)
+        return nbSame < 2
     }
 
     func canPlayerMove(couleur: String) -> Bool {
@@ -402,26 +329,6 @@ struct Jeu:JeuProtocole {
         }
         return Jeu.isOnBorder(x: horizontale, y: verticale)
     }
-
-    /*func canBilleMoveAtPos(bille: Bille, horizontale: Int, verticale: Int) -> Bool {
-        let x = bille.getPosHorizontale(), y = bille.getPosVerticale()
-        guard (x==horizontale || y==verticale) && Jeu.isOnBorder(x:x, y:y) else {
-            return false
-        }
-
-        var canMove = false
-        if x==horizontale { //On déplace la bille sur une colonne
-            for i in getRange(pos: y, target: verticale) {
-                if self.board[i][x] == nil { canMove = true }
-            }
-        } else { //On déplace la bille sur une ligne
-            for i in getRange(pos: x, target: horizontale) {
-                if self.board[y][i] == nil { canMove = true }
-            }
-        }
-
-        return canMove
-    }*/
 
     func canBilleMoveAtPos(bille: Bille, horizontale: Int, verticale: Int) -> Bool {
         let x = bille.getPosHorizontale(), y = bille.getPosVerticale()
@@ -514,14 +421,11 @@ struct Jeu:JeuProtocole {
     //Renvoie la range sur laquelle vérifier s'il y a des boules et le step à suivre
     private func getRange(pos:Int, target:Int) -> (StrideTo<Int>, Int) {
         guard pos-target != 0 else {
-            print("1")
             return (stride(from: 0, to: 0, by: 1), 0)
         }
         if pos-target > 0 { //Gère les cas où pos = Jeu.maxLength-1
-            print("2")
             return (stride(from: Jeu.maxLength-2, to: target, by: -1), -1) //Les billes poussés ne doivent pas aller plus loin que la case (x,y)=(_,1). En excluant la case ciblée de coordonnée (_, target), il reste donc target - 1 cases
         } else { //Gère les cas où pos = 0
-            print("3")
             return (stride(from: 1, to: target, by: 1), 1) //Les billes poussés ne doivent pas aller plus loin que la case (x,y)=(_,Jeu.maxLength-2). En excluant la case ciblée de coordonnée (_, target), il reste donc Jeu.maxLength-2-target cases
         }
     }
@@ -654,8 +558,8 @@ protocol BilleProtocole {
 
 class Bille:BilleProtocole {
     private let couleur:String
-    var posH:Int
-    var posV:Int
+    private var posH:Int
+    private var posV:Int
 
     func getCouleur() -> String {
         return couleur
