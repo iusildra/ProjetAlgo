@@ -1,3 +1,1 @@
-Corriger l'init : il y a des enchaînements de plus de 2 boules de la même couleur
-
-VÉRIFIER FONCTION MOVEBILLEATPOS, CORE DUMPED POUR RAISON INCONNUE
+Vérifier le init, mauvais placement lors du premier run, mais plus après

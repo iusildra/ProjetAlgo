@@ -94,23 +94,24 @@ func checkSelectCoordinates(jeu: Jeu, x:Int, y:Int, joueur:String) -> Bool {
   var res : Bool = false
   if x < 0 || y < 0 {
     print("Les coordonnées ne peuvent pas être négatives !")
-  }
-  else if !jeu.isBorder(horizontale:x, verticale:y) { 
-    print("La position n'est pas sur le bord du plateau !")
-  }
-  else if let bille = jeu.getBilleAtPos(horizontale:x, verticale:y) {
-    if bille.getCouleur() != joueur {
-      print("La bille ne vous appartient pas !")
+  } else {
+    if !jeu.isBorder(horizontale:x, verticale:y) { 
+      print("La position n'est pas sur le bord du plateau !")
+    } else {
+      if let bille = jeu.getBilleAtPos(horizontale:x, verticale:y) {
+        if bille.getCouleur() != joueur {
+          print("La bille ne vous appartient pas !")
+        } else {
+          if !jeu.canBilleMove(bille: bille) {
+            print("La bille ne peut pas être déplacée !")
+          } else { //Si la bille est de la bonne couleur et peut-être déplacée
+            res = true
+          }
+        }
+      } else {
+        print("Il n'y a pas de bille à cet emplacement !")
+      }
     }
-    else if !jeu.canBilleMove(bille: bille) {
-      print("La bille ne peut pas être déplacée !")
-    }
-    else { //Si la bille est de la bonne couleur et peut-être déplacée
-      res = true
-    }
-  }
-  else {
-    print("Il n'y a pas de bille à cet emplacement !")
   }
   return res
 }

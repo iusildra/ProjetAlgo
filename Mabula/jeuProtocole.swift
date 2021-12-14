@@ -89,7 +89,7 @@ enum Player:String {
     }
 
     static func random() -> Self {
-        if Int.random(in: 0...1)%2 == 0 {
+        if Int.random(in: 0...999)%2 == 0 {
             return .B
         } else {
             return .N
@@ -175,7 +175,7 @@ struct Jeu:JeuProtocole {
                 return fill(board: &board, balls: &balls, couleur: couleur, x:newX, y:newY)
             }
 
-            Glibc.system("clear")
+            //Glibc.system("clear")
             for l in board {
                 for b in l {
                     if let b=b {
@@ -324,10 +324,13 @@ struct Jeu:JeuProtocole {
     }
 
     func isBorder(horizontale: Int, verticale: Int) -> Bool { //Useless ?
+        guard Jeu.isOnBorder(x: horizontale, y: verticale) else {
+            return false
+        }
         guard self.board[verticale][horizontale] != nil else {
             return false
         }
-        return Jeu.isOnBorder(x: horizontale, y: verticale)
+        return true
     }
 
     func canBilleMoveAtPos(bille: Bille, horizontale: Int, verticale: Int) -> Bool {
@@ -360,7 +363,7 @@ struct Jeu:JeuProtocole {
     }
 
     mutating func moveBilleAtPos(bille: Bille, horizontale: Int, verticale: Int) {
-        func moveBallTo(bille1:Bille, x:Int, y:Int) {
+        func moveBallTo(bille1:Bille, x:Int, y:Int, initX:Int) {
             guard let existingBall = self.board[y][x] else {
                 bille1.setPosition(horizontale: x, verticale: y)
                 self.board[y][x] = bille1
@@ -370,7 +373,8 @@ struct Jeu:JeuProtocole {
             var billeX = existingBall.getPosHorizontale()
             var billeY = existingBall.getPosVerticale()
 
-            if bille.getPosHorizontale() == horizontale {
+            if initX == horizontale {
+                print(bille.getPosHorizontale())
                 if bille1.getPosVerticale() < billeY { billeY += 1 }
                 else { billeY -= 1 }
             } else {
@@ -380,7 +384,7 @@ struct Jeu:JeuProtocole {
 
             bille1.setPosition(horizontale: x, verticale: y)
             self.board[y][x] = bille1
-            moveBallTo(bille1: existingBall, x: billeX, y: billeY) //La condition d'arrêt est lorsque self.board[verticale][horizontale] est nil. Alors on place la bille 
+            moveBallTo(bille1: existingBall, x: billeX, y: billeY, initX: initX) //La condition d'arrêt est lorsque self.board[verticale][horizontale] est nil. Alors on place la bille 
         }
 
         guard canBilleMoveAtPos(bille: bille, horizontale: horizontale, verticale: verticale) else { //Implique que x==horizontale ou y==verticale
@@ -391,8 +395,9 @@ struct Jeu:JeuProtocole {
         let x = bille.getPosHorizontale() //Très important de les stocker avant
         let y = bille.getPosVerticale() //Sinon typé référence, x et y prennent leur nouvelle valeur, soit verticale ou horizontale...
 
+
         self.board[bille.getPosVerticale()][bille.getPosHorizontale()] = nil
-        moveBallTo(bille1: bille, x: horizontale, y: verticale)
+        moveBallTo(bille1: bille, x: horizontale, y: verticale, initX: x)
 
 
         if x==horizontale {
@@ -401,17 +406,17 @@ struct Jeu:JeuProtocole {
             for i in range.0 {
                 if let newBille = self.board[i][x] {
                     self.board[i][x] = nil
-                    moveBallTo(bille1: newBille, x: horizontale, y: verticale+(count*range.1)) //Si (y||x)==Jeu.maxLength-1, alors on mettra la bille en target-count. Si (y||x)==0, alors on mettra la bille en target+count
+                    moveBallTo(bille1: newBille, x: horizontale, y: verticale+(count*range.1), initX: x) //Si (y||x)==Jeu.maxLength-1, alors on mettra la bille en target-count. Si (y||x)==0, alors on mettra la bille en target+count
                     count+=1
                 }
             }
         } else {
-            let range = getRange(pos: x, target: verticale)
+            let range = getRange(pos: x, target: horizontale)
 
             for i in range.0 {
                 if let newBille = self.board[y][i] {
                     self.board[y][i] = nil
-                    moveBallTo(bille1: newBille, x: horizontale+(count*range.1), y: verticale)
+                    moveBallTo(bille1: newBille, x: horizontale+(count*range.1), y: verticale, initX: x)
                     count+=1
                 }
             }
