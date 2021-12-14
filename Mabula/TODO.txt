@@ -1,1 +1,1 @@
-Vérifier le init, mauvais placement lors du premier run, mais plus après
+Vérifier le code
