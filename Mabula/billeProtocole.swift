@@ -1,5 +1,5 @@
 //BilleProtocole représente une bille, avec une position horizontale et verticale, et une couleur pour savoir à quel joueur la bille appartient
-/*protocol BilleProtocole {
+protocol BilleProtocole {
 
     // init : String x Int x Int -> Bille
     // Initialise une Bille de couleur et à une position données
@@ -25,7 +25,7 @@
     mutating func setPosition(horizontale: Int, verticale: Int)
 }
 
-struct Bille:BilleProtocole {
+class Bille:BilleProtocole {
     private let couleur:String
     private var posH:Int
     private var posV:Int
@@ -42,15 +42,14 @@ struct Bille:BilleProtocole {
         return posV
     }
 
-    mutating func setPosition(horizontale: Int, verticale: Int) {
+    func setPosition(horizontale: Int, verticale: Int) {
         self.posH = horizontale
         self.posV = verticale
     }
 
-    init(couleur: String, horizontale: Int, verticale: Int) {
+    required init(couleur: String, horizontale: Int, verticale: Int) {
         self.couleur = couleur
         self.posH = horizontale
         self.posV = verticale
     }
 }
-*/
