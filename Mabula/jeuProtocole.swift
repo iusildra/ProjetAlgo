@@ -439,6 +439,9 @@ struct Jeu:JeuProtocole {
     }
 
     func getBilleAtPos(horizontale: Int, verticale: Int) -> Bille? {
+        guard Jeu.isOnBorder(x: horizontale, y: verticale) else {
+            return nil
+        }
         return self.board[verticale][horizontale]
     }
 
@@ -480,7 +483,7 @@ struct Jeu:JeuProtocole {
         return prod
     }
 
-    func getGroup(bille: Bille) -> Int { //Fonction non utilisé car ne permettait difficilement de faire la fonction multGroup. Il était moins complexe d'avoir une fonction avec en paramètre un tableau des billes déjà parcourues. Cela permettait d'éviter de parcourir plusieurs fois le même groupe de bille (pas un problème pour déterminer la groupe max, mais est un problème pour la régle de calcul avec la multiplication).
+    func getGroup(bille: Bille) -> Int { //Fonction non utilisé car ne permettait difficilement de faire la fonction multGroup. Il était moins complexe d'avoir une fonction avec en paramètre inout un tableau des billes déjà parcourues. Cela permettait d'éviter de parcourir plusieurs fois le même groupe de bille (pas un problème pour déterminer le groupe max, mais est un problème pour la régle de calcul avec la multiplication).
         return 0
     }
 
