@@ -142,6 +142,7 @@ struct Jeu:JeuProtocole {
                 self.board[ball.getPosVerticale()][ball.getPosHorizontale()] = ball
             }
         }
+        print(board)
 
     }
 
@@ -439,7 +440,7 @@ struct Jeu:JeuProtocole {
     }
 
     func getBilleAtPos(horizontale: Int, verticale: Int) -> Bille? {
-        guard Jeu.isOnBorder(x: horizontale, y: verticale) else {
+        guard horizontale >= 0 && horizontale < Jeu.maxLength && verticale >= 0 && verticale < Jeu.maxLength else {
             return nil
         }
         return self.board[verticale][horizontale]
