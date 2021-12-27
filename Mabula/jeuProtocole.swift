@@ -135,21 +135,18 @@ struct Jeu:JeuProtocole {
         self.playerBalls[Player.N.rawValue]?.append(Bille.init(couleur: Player.N.rawValue, horizontale: 3, verticale: 5))
         self.playerBalls[Player.N.rawValue]?.append(Bille.init(couleur: Player.N.rawValue, horizontale: 4, verticale: 5))*/
         
-        Jeu.fillBoard(board: &self.board, balls: &playerBalls)
+        _ = Jeu.fillBoard(board: &self.board, balls: &playerBalls, couleur: Player.random())
 
         for (_,balls) in self.playerBalls {
             for ball in balls {
                 self.board[ball.getPosVerticale()][ball.getPosHorizontale()] = ball
             }
         }
-        print(board)
-
     }
 
 
-    private static func fillBoard(board:inout[[Bille?]], balls:inout [String:[Bille]]) {
-        //Fonction récursive pour remplir le plateau. Renvoie true s'il est possible de remplir le plateau à la position indiquée avec une bille appatenant au joueur
-        func fill(board:inout[[Bille?]], balls:inout[String:[Bille]], couleur:Player, x:Int=1, y:Int=0) -> Bool {
+    //Fonction récursive pour remplir le plateau. Renvoie true s'il est possible de remplir le plateau à la position indiquée avec une bille appatenant au joueur
+    private static func fillBoard(board:inout[[Bille?]], balls:inout[String:[Bille]], couleur:Player, x:Int=1, y:Int=0) -> Bool {
             var newX=x, newY=y
 
             //Détermination de la position de la case suivante en suivant un parcours anti-trigonométrique
@@ -175,24 +172,11 @@ struct Jeu:JeuProtocole {
             }
 
             guard Jeu.isOnBorder(x: x, y: y) else {
-                return fill(board: &board, balls: &balls, couleur: couleur, x:newX, y:newY) //On est sur un coin, il faut donc poursuivre le remplissage sur la case suivante
+                return fillBoard(board: &board, balls: &balls, couleur: couleur, x:newX, y:newY) //On est sur un coin, il faut donc poursuivre le remplissage sur la case suivante
             }
-
-            //Pour faire joli
-            /*Glibc.system("clear")
-            for l in board {
-                for b in l {
-                    if let b=b {
-                        print(b.getCouleur(), terminator: " ")
-                    } else { print("_", terminator: " ")}
-                }
-                print()
-            }*/
-
             guard balls[couleur.rawValue]!.count <= 12 && balls[couleur.next().rawValue]!.count <= 12 else {
                 return false //Une joueur a plus de 12 billes, le placement est donc faux
             }
-
             guard board[y][x] == nil else {
                 if balls[couleur.rawValue]?.count == 12 && balls[couleur.next().rawValue]?.count == 12 { //On est sûr d'être sur un bord et pas sur un coin. Si la case n'est pas vide, alors c'est qu'on a bouclé sur tout le plateau. On s'assure que chaque joueur ait 12 billes 
                     return true
@@ -208,31 +192,28 @@ struct Jeu:JeuProtocole {
                 board[y][x] = bille
                 balls[couleur.rawValue]?.append(bille)
 
-                if fill(board: &board, balls: &balls, couleur: Player.random(), x:newX, y:newY) { //On essaie de remplir le reste du plateau
+                if fillBoard(board: &board, balls: &balls, couleur: Player.random(), x:newX, y:newY) { //On essaie de remplir le reste du plateau
                     return true //Toutes les billes après ont pu être placé, donc le placement est correct
                 } else { //Les billes suivantes n'ont pas pu être placées, le placement est incorrect
-                    board[y][x] = nil //On supprimer la bille du plateau
-                    balls[couleur.rawValue]?.removeLast() //Et on la sort du set de bille du joueur
+                    board[y][x] = nil
+                    balls[couleur.rawValue]?.removeLast()
                 }
             }
 
+            //Le joueur ne peut pas poser sa bille, on essaie avec l'autre joueur
             let billeOther = Bille.init(couleur: couleur.next().rawValue, horizontale: x, verticale: y)
-            //Le joueur ne peux pas poser sa bille, on essaie donc avec l'autre joueur
             if Jeu.canBeSetOnBorder(board: &board, couleur: couleur.next().rawValue, horizontale: x, verticale: y) {
                 board[y][x] = billeOther
                 balls[couleur.next().rawValue]?.append(billeOther)
-                if fill(board: &board, balls: &balls, couleur: couleur.next(), x:newX, y:newY) { //Même si le premier joueur pouvait poser sa bille, le placement derrière n'est pas bon. On essaie donc avec une bille de l'autre joueur
+                if fillBoard(board: &board, balls: &balls, couleur: couleur.next(), x:newX, y:newY) { //Même si le premier joueur pouvait poser sa bille, le placement derrière n'est pas bon. On essaie donc avec une bille de l'autre joueur
                     return true
                 } else {
                     board[y][x] = nil
                     balls[couleur.next().rawValue]?.removeLast()
-                    return false //Aucun joueur n'a pu poser sa bille, la placement est donc faux
                 }
-            } else { return false } //Aucun joueur n'a pu poser sa bille, la placement est donc faux
-        }
+            }
 
-        _ = fill(board: &board, balls: &balls, couleur: Player.random())
-
+            return false //Aucun joueur n'a pu poser sa bille, la placement est donc faux, il faut revenir en arrière
     }
 
     static func canBeSetOnBorder(board:inout[[Bille?]], couleur: String, horizontale: Int, verticale: Int) -> Bool {
@@ -284,6 +265,7 @@ struct Jeu:JeuProtocole {
         var index=0 //compteur pour les toutes premières billes. Utilisé pour vérifier le placement de la dernière bille.
         var i = 0
         while i < 2 {
+            //On ne doit vérifier que 2 boules
             if balls[balls.count-1 - nbSame].getCouleur() == couleur { nbSame+=1 } //Vérifie les 2 dernières billes
             if balls.count == 23 && balls[index].getCouleur() == couleur { index+=1; nbSame+=1 }  //Vérifie si la dernière bille est bien placé (vérifie en plus les premières billes posées). count==23 car on vérifie avant de poser, donc la taille maximale de balls sera 23 et non 24
             i+=1
@@ -333,10 +315,10 @@ struct Jeu:JeuProtocole {
         guard self.board[verticale][horizontale] != nil else {
             return false
         }
-        return true //True si les coordonées sont sur le bord et pas dans un coin et si une bille existe à ces coordonnées
+        return true
     }
 
-    //Une bille peut bouger si les billes qu'elle va déplacer ne sortent pas du centre du plateau 0<=x,y<=6
+    //Une bille peut bouger si les billes qu'elle va déplacer ne sortent pas du centre du plateau (1<=x,y<=6)
     func canBilleMoveAtPos(bille: Bille, horizontale: Int, verticale: Int) -> Bool {
         let x = bille.getPosHorizontale(), y = bille.getPosVerticale()
         guard (x==horizontale || y==verticale) && Jeu.isOnBorder(x:x, y:y) else {
@@ -344,7 +326,7 @@ struct Jeu:JeuProtocole {
         }
 
         var nbBalls = 0
-        //Compte le nombre de bille pour le comparer avec le nombre d'emplacement disponible après déplacement
+        //Compte le nombre de bille (sans compter celle à bouger) pour le comparer avec le nombre d'emplacement disponible après déplacement
         if x==horizontale { //On déplace la bille sur une colonne
             for i in 1..<Jeu.maxLength-1 {
                 if self.board[i][x] != nil { nbBalls += 1 }
@@ -361,14 +343,14 @@ struct Jeu:JeuProtocole {
     //Détermine le nombre de bille max qu'une bille peut décaler en se déplaçant
     private func getMaxNbBalls(pos:Int, target:Int) -> Int {
         if pos-target > 0 { //Gère les cas où pos = Jeu.maxLength-1
-            return target-1 //Les billes poussés ne doivent pas aller plus loin que la case (x,y)=(_,1). En excluant la case ciblée de coordonnée (_, target), il reste donc target - 1 cases
+            return target-1 //Les billes poussés ne doivent pas aller plus loin que la case (_,1) ou (1,_). En excluant la case cible, il reste donc target - 1 cases
         } else { //Gère les cas où pos = 0
-            return Jeu.maxLength-2-target //Les billes poussés ne doivent pas aller plus loin que la case (x,y)=(_,Jeu.maxLength-2). En excluant la case ciblée de coordonnée (_, target), il reste donc Jeu.maxLength-2-target cases
+            return Jeu.maxLength-2-target //Les billes poussés ne doivent pas aller plus loin que la case (Jeu.maxLength-2,_) ou (_,Jeu.maxLength-2). En excluant la case cible, il reste donc Jeu.maxLength-2-target cases
         }
     }
 
     mutating func moveBilleAtPos(bille: Bille, horizontale: Int, verticale: Int) {
-        func moveBallTo(bille1:Bille, x:Int, y:Int, initX:Int, initY:Int) {//initX et initY pour garder la position initiale de la bille (car bille type référence)
+        func moveBallTo(bille1:Bille, x:Int, y:Int, initX:Int, initY:Int) {//initX et initY pour garder la position initiale de la bille (car bille type référence) et déterminer comment décaler la(les) bille(s) à déplacer
             guard let existingBall = self.board[y][x] else { //Si la case est vide, on peut poser directement la bille et mettre à jour ses attributs
                 bille1.setPosition(horizontale: x, verticale: y)
                 self.board[y][x] = bille1
@@ -378,6 +360,7 @@ struct Jeu:JeuProtocole {
             var billeX = existingBall.getPosHorizontale()
             var billeY = existingBall.getPosVerticale()
 
+            //Détermine où poser la bille existant déjà sur cette position
             if initX == horizontale { //On déplace la bille sur une colonne
                 if initY < billeY { billeY += 1 } //Détermine le sens de décalage
                 else { billeY -= 1 }
@@ -410,7 +393,7 @@ struct Jeu:JeuProtocole {
             for i in range.0 {
                 if let newBille = self.board[i][x] {
                     self.board[i][x] = nil
-                    moveBallTo(bille1: newBille, x: horizontale, y: verticale+(count*range.1), initX: x, initY: y) //Si (y||x)==Jeu.maxLength-1, alors on mettra la bille en target-count. Si (y||x)==0, alors on mettra la bille en target+count. On décalle les billes en gardant l'ordre dans laquelle elles étaient.
+                    moveBallTo(bille1: newBille, x: horizontale, y: verticale+(count*range.1), initX: x, initY: y) //Si (y||x)==Jeu.maxLength-1, alors on mettra la bille en target-count (count représente le nombre de billes déjà décalées (en comptant la première bille)). Si (y||x)==0, alors on mettra la bille en target+count. On décalle les billes en gardant l'ordre dans laquelle elles étaient.
                     count+=1
                 }
             }
@@ -433,9 +416,9 @@ struct Jeu:JeuProtocole {
             return (stride(from: 0, to: 0, by: 1), 0)
         }
         if pos-target > 0 { //Gère les cas où pos = Jeu.maxLength-1
-            return (stride(from: Jeu.maxLength-2, to: target, by: -1), -1) //Les billes poussés ne doivent pas aller plus loin que la case (x,y)=(_,1). En excluant la case ciblée de coordonnée (_, target), il reste donc target - 1 cases
+            return (stride(from: Jeu.maxLength-2, to: target, by: -1), -1) //Les billes poussés ne doivent pas aller plus loin que la case (_,1) ou (1,_). En excluant la case cible, il reste donc target - 1 cases
         } else { //Gère les cas où pos = 0
-            return (stride(from: 1, to: target, by: 1), 1) //Les billes poussés ne doivent pas aller plus loin que la case (x,y)=(_,Jeu.maxLength-2). En excluant la case ciblée de coordonnée (_, target), il reste donc Jeu.maxLength-2-target cases
+            return (stride(from: 1, to: target, by: 1), 1) //Les billes poussés ne doivent pas aller plus loin que la case (Jeu.maxLength-2,_) ou (_,Jeu.maxLength-2). En excluant la case cible, il reste donc Jeu.maxLength-2-target cases
         }
     }
 
@@ -456,11 +439,11 @@ struct Jeu:JeuProtocole {
         beenThere.reserveCapacity(12)
 
         for ball in self.playerBalls[couleur]! {
-            var accN=0, accE=0, accS=0, accW=0
-            group(bille: ball, beenThere: &beenThere, accN: &accN, accE: &accE, accS: &accS, accW: &accW) //Pour chaque bille sur laquelle on est pas passé (et par extension son groupe) on récupère la taille de son groupe
-            let count = 1+accN+accE+accS+accW
+            //Invariant : chaque groupe parcouru est inférieur ou égal en taille au groupe auquel appartient la bille
+            let count = group(bille: ball, beenThere: &beenThere) //Pour chaque bille sur laquelle on est pas passé (et par extension son groupe) on récupère la taille de son groupe
             if count > max {
                 max = count
+                //On rétablit l'invariant
             }
         }
         return max
@@ -476,9 +459,8 @@ struct Jeu:JeuProtocole {
         beenThere.reserveCapacity(12)
 
         for ball in self.playerBalls[couleur]! {
-            var accN=0, accE=0, accS=0, accW=0
-            group(bille: ball, beenThere: &beenThere, accN: &accN, accE: &accE, accS: &accS, accW: &accW)
-            prod *= 1+accN+accE+accS+accW //Pour chaque bille sur laquelle on est pas déjà passé (et par extension son groupe) on multiplie au produit la taille de son groupe
+            let count = group(bille: ball, beenThere: &beenThere)
+            prod *= count //Pour chaque bille sur laquelle on est pas déjà passé (et par extension son groupe) on multiplie au produit la taille de son groupe
         }
 
         return prod
@@ -489,36 +471,35 @@ struct Jeu:JeuProtocole {
     }
 
     //Le paramètre beenThere en inout permet d'éviter de parcourir plusieurs fois un même groupe (grâce au inout). Il permet aussi d'éviter de boucler à l'infini quand on tombe sur un enchaînement du type "oeil" (comme en go)
-    private func group(bille:Bille, beenThere:inout [Bille], accN:inout Int, accE:inout Int, accS:inout Int, accW:inout Int) {
+    private func group(bille:Bille, beenThere:inout [Bille]) -> Int {
         let x = bille.getPosHorizontale()
         let y = bille.getPosVerticale()
         beenThere.append(bille)
 
+        var count = 1 //Il existe au moins une bille, on a donc une longueur de 1
         //Parcours du groupe dans les directions Nord, Sud, Est, Ouest. On ne parcourt dans la direction indiquée que si on ne dépasse pas du tableau, s'il existe une bille et qu'elle est de la même couleur que la bille actuelle
         if y>0, let newBranch = self.board[y-1][x], newBranch.getCouleur()==bille.getCouleur() {
             if !ballContained(bille: newBranch, beenThere: &beenThere) {
-                accN+=1
-                group(bille: newBranch, beenThere: &beenThere, accN: &accN, accE: &accE, accS: &accS, accW: &accW)
+                count += group(bille: newBranch, beenThere: &beenThere)
             }
         }
         if x<Jeu.maxLength-1, let newBranch = self.board[y][x+1], newBranch.getCouleur()==bille.getCouleur() {
             if !ballContained(bille: newBranch, beenThere: &beenThere) {
-                accE+=1
-                group(bille: newBranch, beenThere: &beenThere, accN: &accN, accE: &accE, accS: &accS, accW: &accW)
+                count += group(bille: newBranch, beenThere: &beenThere)
             }
         }
         if y<Jeu.maxLength-1, let newBranch = self.board[y+1][x], newBranch.getCouleur()==bille.getCouleur() {
             if !ballContained(bille: newBranch, beenThere: &beenThere) {
-                accS+=1
-                group(bille: newBranch, beenThere: &beenThere, accN: &accN, accE: &accE, accS: &accS, accW: &accW)
+                count += group(bille: newBranch, beenThere: &beenThere)
             }
         }
         if x>0, let newBranch = self.board[y][x-1], newBranch.getCouleur()==bille.getCouleur() {
             if !ballContained(bille: newBranch, beenThere: &beenThere) {
-                accW+=1
-                group(bille: newBranch, beenThere: &beenThere, accN: &accN, accE: &accE, accS: &accS, accW: &accW)
+                count += group(bille: newBranch, beenThere: &beenThere)
             }
         }
+        
+        return count
     }
 
     private func ballContained(bille:Bille, beenThere:inout [Bille]) -> Bool {
