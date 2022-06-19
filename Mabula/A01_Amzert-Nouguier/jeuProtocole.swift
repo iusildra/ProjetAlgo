@@ -109,7 +109,7 @@ struct Jeu:JeuProtocole {
         self.playerBalls = [Player.B.rawValue:ballsB, Player.N.rawValue:ballsN]
 
         //Exemple de position proche de la fin regroupant toutes les éléments qui pourraient poser problème lors du calcul des scores. Simple branche et structure en "oeil"
-        self.playerBalls[Player.B.rawValue]?.append(Bille.init(couleur: Player.B.rawValue, horizontale: 3, verticale: 2))
+        /*self.playerBalls[Player.B.rawValue]?.append(Bille.init(couleur: Player.B.rawValue, horizontale: 3, verticale: 2))
         self.playerBalls[Player.B.rawValue]?.append(Bille.init(couleur: Player.B.rawValue, horizontale: 4, verticale: 2))
         self.playerBalls[Player.B.rawValue]?.append(Bille.init(couleur: Player.B.rawValue, horizontale: 5, verticale: 2))
         self.playerBalls[Player.B.rawValue]?.append(Bille.init(couleur: Player.B.rawValue, horizontale: 2, verticale: 3))
@@ -133,9 +133,9 @@ struct Jeu:JeuProtocole {
         self.playerBalls[Player.N.rawValue]?.append(Bille.init(couleur: Player.N.rawValue, horizontale: 1, verticale: 5))
         self.playerBalls[Player.N.rawValue]?.append(Bille.init(couleur: Player.N.rawValue, horizontale: 6, verticale: 5))
         self.playerBalls[Player.N.rawValue]?.append(Bille.init(couleur: Player.N.rawValue, horizontale: 3, verticale: 5))
-        self.playerBalls[Player.N.rawValue]?.append(Bille.init(couleur: Player.N.rawValue, horizontale: 4, verticale: 5))
+        self.playerBalls[Player.N.rawValue]?.append(Bille.init(couleur: Player.N.rawValue, horizontale: 4, verticale: 5))*/
         
-        //_ = Jeu.fillBoard(board: &self.board, balls: &playerBalls, couleur: Player.random())
+        _ = Jeu.fillBoard(board: &self.board, balls: &playerBalls, couleur: Player.random())
 
         for (_,balls) in self.playerBalls {
             for ball in balls {
